@@ -2,11 +2,12 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -18,6 +19,9 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,9 +30,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './app/package-lock.json'
           
       - name: Install Dependencies
         run: cd app && npm ci
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
         
       - name: Prepare App for GitHub Pages
         run: |
@@ -39,6 +48,8 @@ jobs:
           import { useState, useEffect } from 'react';
           import { Switch, Route } from 'wouter';
           import { Toaster } from '@/components/ui/toaster';
+          import { queryClient } from "@/lib/queryClient";
+          import { QueryClientProvider } from "@tanstack/react-query";
           
           // Pages
           import Home from '@/pages/Home';
@@ -65,7 +76,7 @@ jobs:
             }, []);
           
             // Replace history functions to work with hash
-            const navigate = (to: string) => {
+            const navigate = (to) => {
               window.location.hash = to;
             };
           
@@ -88,26 +99,73 @@ jobs:
           
           function App() {
             return (
-              <div className="min-h-screen bg-background">
-                <Router />
-                <Toaster />
-              </div>
+              <QueryClientProvider client={queryClient}>
+                <div className="min-h-screen bg-background">
+                  <Router />
+                  <Toaster />
+                </div>
+              </QueryClientProvider>
             );
           }
           
           export default App;
           EOL
           
-      - name: Build Frontend
-        run: |
-          cd app
-          node --input-type=module build-static.js
+          # Create vite.config.ts for GitHub Pages
+          cat > vite.config.ts << 'EOL'
+          import { defineConfig } from 'vite';
+          import react from '@vitejs/plugin-react';
+          import path from 'path';
+
+          // https://vitejs.dev/config/
+          export default defineConfig({
+            base: '/Algorithm-Trainer/',
+            plugins: [react()],
+            resolve: {
+              alias: {
+                '@': path.resolve(__dirname, './client/src'),
+                '@shared': path.resolve(__dirname, './shared'),
+                '@server': path.resolve(__dirname, './server'),
+              },
+            },
+            build: {
+              outDir: '../dist',
+              emptyOutDir: true,
+            },
+          });
+          EOL
+          
+          # Create 404.html file for GitHub Pages
+          cat > 404.html << 'EOL'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Algorithm Trainer</title>
+            <script>
+              // Redirect all 404 to the index.html with the requested path
+              const segment = location.pathname.substring(1).split('/')[0];
+              const baseHref = '/Algorithm-Trainer/';
+              window.location.href = baseHref + '#' + location.pathname.substring(baseHref.length);
+            </script>
+          </head>
+          <body>
+            <p>Redirecting...</p>
+          </body>
+          </html>
+          EOL
+          
+      - name: Build
+        run: cd app && npm run build
         
       - name: Copy 404.html to dist
-        run: cp 404.html dist/
+        run: cp app/404.html dist/
         
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: dist
-          branch: gh-pages
+          path: "./dist"
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
