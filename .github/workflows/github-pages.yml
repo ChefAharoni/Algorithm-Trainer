@@ -30,28 +30,15 @@ jobs:
       - name: Install Dependencies
         run: cd app && npm ci
         
+      - name: Copy Build Files
+        run: |
+          # Copy our build script and 404.html file to app directory
+          cp build-static.js app/
+          cp 404.html app/
+          
       - name: Prepare App for GitHub Pages
         run: |
           cd app
-          
-          # Create a custom build script for the frontend only
-          cat > build-static.js << 'EOL'
-          const { execSync } = require('child_process');
-          const fs = require('fs');
-          const path = require('path');
-
-          // Ensure dist directory exists
-          const distDir = path.resolve(__dirname, '../dist');
-          if (!fs.existsSync(distDir)) {
-            fs.mkdirSync(distDir, { recursive: true });
-          }
-
-          // Run Vite build for the frontend
-          console.log('Building frontend with Vite...');
-          execSync('npx vite build --outDir ../dist', { stdio: 'inherit' });
-
-          console.log('Build completed successfully!');
-          EOL
           
           # Create App.tsx for GitHub Pages with HashRouter
           cat > client/src/App.tsx << 'EOL'
@@ -115,32 +102,6 @@ jobs:
           }
           
           export default App;
-          EOL
-          
-          # Create vite.config.ts for GitHub Pages
-          cat > vite.config.ts << 'EOL'
-          import { defineConfig } from 'vite';
-          import react from '@vitejs/plugin-react';
-          import path from 'path';
-          
-          // https://vitejs.dev/config/
-          export default defineConfig({
-            base: '/Algorithm-Trainer/',
-            plugins: [react()],
-            resolve: {
-              alias: {
-                '@': path.resolve(__dirname, './client/src'),
-                '@shared': path.resolve(__dirname, './shared'),
-                '@server': path.resolve(__dirname, './server'),
-              },
-            },
-            build: {
-              outDir: '../dist',
-              emptyOutDir: true,
-              sourcemap: true,
-            },
-            root: './client',
-          });
           EOL
           
       - name: Build Frontend

@@ -1,168 +1,74 @@
-/*
- * This script helps test the GitHub Pages build locally
- * It simulates the GitHub Actions workflow for building the static site
+/**
+ * Test script for GitHub Pages build
+ * This script verifies that the build output is valid for GitHub Pages deployment
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-
-const tempDir = path.join(os.tmpdir(), 'algorithm-trainer-test-build');
-const distDir = path.resolve(__dirname, 'dist');
-
-// Ensure temp directory exists and is empty
-console.log(`Setting up temporary directory at ${tempDir}...`);
-if (fs.existsSync(tempDir)) {
-  fs.rmSync(tempDir, { recursive: true, force: true });
-}
-fs.mkdirSync(tempDir, { recursive: true });
-
-// Copy current project to temp directory
-console.log('Copying project files...');
-execSync(`cp -r ./app/* ${tempDir}`);
-
-// Navigate to temp directory
-process.chdir(tempDir);
-
-// Create build-static.js
-console.log('Creating build script...');
-fs.writeFileSync('build-static.js', `
-const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Ensure dist directory exists
-const distDir = path.resolve(__dirname, '../dist');
+// Check if build directory exists
+const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
-  fs.mkdirSync(distDir, { recursive: true });
-}
-
-// Run Vite build for the frontend
-console.log('Building frontend with Vite...');
-execSync('npx vite build --outDir ../dist', { stdio: 'inherit' });
-
-console.log('Build completed successfully!');
-`);
-
-// Create App.tsx for GitHub Pages with HashRouter
-console.log('Creating App.tsx for GitHub Pages...');
-fs.writeFileSync('client/src/App.tsx', `
-import { useState, useEffect } from 'react';
-import { Switch, Route } from 'wouter';
-import { Toaster } from '@/components/ui/toaster';
-
-// Pages
-import Home from '@/pages/Home';
-import RPNPage from '@/pages/RPNPage';
-import TreePage from '@/pages/TreePage';
-import NotFound from '@/pages/not-found';
-
-// HashRouter wrapper for GitHub Pages
-function useHashLocation() {
-  const [location, setLocation] = useState(
-    window.location.hash ? window.location.hash.replace("#", "") : "/"
-  );
-
-  useEffect(() => {
-    // Handle hash change and remove the # from the location
-    const handleHashChange = () => {
-      const hash = window.location.hash || "#/";
-      setLocation(hash.replace("#", ""));
-    };
-
-    window.addEventListener("hashchange", handleHashChange);
-    handleHashChange(); // Handle initial hash
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
-
-  // Replace history functions to work with hash
-  const navigate = (to: string) => {
-    window.location.hash = to;
-  };
-
-  return [location, navigate];
-}
-
-function Router() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [location, navigate] = useHashLocation();
-  
-  return (
-    <Switch location={location}>
-      <Route path="/" component={Home} />
-      <Route path="/rpn" component={RPNPage} />
-      <Route path="/tree" component={TreePage} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-function App() {
-  return (
-    <div className="min-h-screen bg-background">
-      <Router />
-      <Toaster />
-    </div>
-  );
-}
-
-export default App;
-`);
-
-// Create vite.config.ts for GitHub Pages
-console.log('Creating Vite config for GitHub Pages...');
-fs.writeFileSync('vite.config.ts', `
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  base: '/Algorithm-Trainer/',
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './client/src'),
-      '@shared': path.resolve(__dirname, './shared'),
-      '@server': path.resolve(__dirname, './server'),
-    },
-  },
-  build: {
-    outDir: '../dist',
-    emptyOutDir: true,
-    sourcemap: true,
-  },
-  root: './client',
-});
-`);
-
-try {
-  // Build the application
-  console.log('Building application...');
-  execSync('node build-static.js', { stdio: 'inherit' });
-  
-  // Copy 404.html
-  console.log('Copying 404.html...');
-  const sourcePath = path.resolve(__dirname, '404.html');
-  const destPath = path.resolve(__dirname, 'dist', '404.html');
-  if (fs.existsSync(sourcePath)) {
-    fs.copyFileSync(sourcePath, destPath);
-    console.log('404.html copied successfully.');
-  } else {
-    console.warn('Warning: 404.html not found. Skipping copy.');
-  }
-
-  // Clean up the temp directory
-  console.log('Cleaning up...');
-  fs.rmSync(tempDir, { recursive: true, force: true });
-
-  console.log('\n✅ Build completed successfully!');
-  console.log(`\nThe build output is in the 'dist' directory.`);
-  console.log(`\nTo preview the GitHub Pages build, run:`);
-  console.log(`\n  cd dist && npx serve -s`);
-  console.log(`\nThen open http://localhost:3000 in your browser.\n`);
-} catch (error) {
-  console.error('\n❌ Build failed', error);
+  console.error('❌ Error: dist directory does not exist. Run build-static.js first.');
   process.exit(1);
 }
+
+// Check for essential files
+const requiredFiles = ['index.html', 'assets'];
+for (const file of requiredFiles) {
+  const filePath = path.join(distDir, file);
+  if (!fs.existsSync(filePath)) {
+    console.error(`❌ Error: ${file} not found in dist directory`);
+    process.exit(1);
+  }
+}
+
+// Check if index.html contains proper base href for GitHub Pages
+const indexHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
+if (!indexHtml.includes('<base href="/">') && !indexHtml.includes('<base href="./">')) {
+  console.warn('⚠️ Warning: index.html does not contain a base href tag, which may cause routing issues on GitHub Pages');
+}
+
+// Look for client-side routing
+if (indexHtml.includes('wouter') && !indexHtml.includes('hashRouter')) {
+  console.warn('⚠️ Warning: You appear to be using wouter but not hashRouter. This may cause routing issues on GitHub Pages');
+}
+
+// Check if 404.html exists in the dist directory
+const hasCustom404 = fs.existsSync(path.join(distDir, '404.html'));
+if (!hasCustom404) {
+  console.warn('⚠️ Warning: 404.html is missing. Consider adding one for better GitHub Pages experience');
+}
+
+// Check if the bundle size is reasonable
+let totalSize = 0;
+function calculateDirSize(dir) {
+  const files = fs.readdirSync(dir);
+  
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const stats = fs.statSync(filePath);
+    
+    if (stats.isDirectory()) {
+      calculateDirSize(filePath);
+    } else {
+      totalSize += stats.size;
+    }
+  }
+}
+
+calculateDirSize(distDir);
+const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+
+if (totalSizeMB > 10) {
+  console.warn(`⚠️ Warning: Bundle size is ${totalSizeMB}MB, which is quite large. Consider optimizing.`);
+} else {
+  console.log(`✅ Bundle size: ${totalSizeMB}MB`);
+}
+
+console.log('✅ GitHub Pages build check completed successfully!');
+console.log('');
+console.log('Note: This check does not guarantee that the site will work perfectly on GitHub Pages,');
+console.log('      but it verifies the basic requirements for deployment.');
+console.log('');
+console.log('👨‍💻 To deploy to GitHub Pages, push to the main branch and GitHub Actions will handle the rest.');
