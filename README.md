@@ -57,7 +57,3 @@ The GitHub Actions workflow will:
 3. Configure the application for GitHub Pages (with HashRouter)
 4. Build the application
 5. Deploy to the `gh-pages` branch
-
-## License
-
-MIT
