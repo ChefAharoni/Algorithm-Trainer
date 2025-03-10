@@ -1,0 +1,100 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: './app/package-lock.json'
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Install dependencies
+        run: cd app && npm ci
+      - name: Create vite.config.ts for static build
+        run: |
+          cd app
+          cat > vite.config.ts << 'EOL'
+          import { defineConfig } from 'vite';
+          import react from '@vitejs/plugin-react';
+          import path from 'path';
+
+          // https://vitejs.dev/config/
+          export default defineConfig({
+            base: '/Algorithm-Trainer/',
+            plugins: [react()],
+            resolve: {
+              alias: {
+                '@': path.resolve(__dirname, './client/src'),
+                '@shared': path.resolve(__dirname, './shared'),
+                '@server': path.resolve(__dirname, './server'),
+              },
+            },
+            build: {
+              outDir: '../dist',
+              emptyOutDir: true,
+            },
+          });
+          EOL
+      - name: Create main.tsx for static build
+        run: |
+          cd app
+          cat > client/src/main.tsx << 'EOL'
+          import React from 'react'
+          import ReactDOM from 'react-dom/client'
+          import App from './App.tsx'
+          import './index.css'
+          import { QueryClientProvider } from '@tanstack/react-query'
+          import { queryClient } from '@/lib/queryClient'
+
+          ReactDOM.createRoot(document.getElementById('root')!).render(
+            <React.StrictMode>
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
+            </React.StrictMode>
+          )
+          EOL
+      - name: Build
+        run: cd app && npm run build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./dist"
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

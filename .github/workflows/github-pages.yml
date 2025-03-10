@@ -1,0 +1,141 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install Dependencies
+        run: cd app && npm ci
+        
+      - name: Install jq for JSON manipulation
+        run: sudo apt-get install -y jq
+        
+      - name: Prepare App for GitHub Pages
+        run: |
+          cd app
+          
+          # Create App.tsx for GitHub Pages with HashRouter
+          cat > client/src/App.tsx << 'EOL'
+          import { useState, useEffect } from 'react';
+          import { Switch, Route } from 'wouter';
+          import { Toaster } from '@/components/ui/toaster';
+          
+          // Pages
+          import Home from '@/pages/Home';
+          import RPNPage from '@/pages/RPNPage';
+          import TreePage from '@/pages/TreePage';
+          import NotFound from '@/pages/not-found';
+          
+          // HashRouter wrapper for GitHub Pages
+          function useHashLocation() {
+            const [location, setLocation] = useState(
+              window.location.hash ? window.location.hash.replace("#", "") : "/"
+            );
+          
+            useEffect(() => {
+              // Handle hash change and remove the # from the location
+              const handleHashChange = () => {
+                const hash = window.location.hash || "#/";
+                setLocation(hash.replace("#", ""));
+              };
+          
+              window.addEventListener("hashchange", handleHashChange);
+              handleHashChange(); // Handle initial hash
+              return () => window.removeEventListener("hashchange", handleHashChange);
+            }, []);
+          
+            // Replace history functions to work with hash
+            const navigate = (to: string) => {
+              window.location.hash = to;
+            };
+          
+            return [location, navigate];
+          }
+          
+          function Router() {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [location, navigate] = useHashLocation();
+            
+            return (
+              <Switch location={location}>
+                <Route path="/" component={Home} />
+                <Route path="/rpn" component={RPNPage} />
+                <Route path="/tree" component={TreePage} />
+                <Route component={NotFound} />
+              </Switch>
+            );
+          }
+          
+          function App() {
+            return (
+              <div className="min-h-screen bg-background">
+                <Router />
+                <Toaster />
+              </div>
+            );
+          }
+          
+          export default App;
+          EOL
+          
+          # Create vite.config.ts for GitHub Pages
+          cat > vite.config.ts << 'EOL'
+          import { defineConfig } from 'vite';
+          import react from '@vitejs/plugin-react';
+          import path from 'path';
+          
+          // https://vitejs.dev/config/
+          export default defineConfig({
+            base: '/Algorithm-Trainer/',
+            plugins: [react()],
+            resolve: {
+              alias: {
+                '@': path.resolve(__dirname, './client/src'),
+                '@shared': path.resolve(__dirname, './shared'),
+                '@server': path.resolve(__dirname, './server'),
+              },
+            },
+            build: {
+              outDir: '../dist',
+              emptyOutDir: true,
+            },
+          });
+          EOL
+          
+          # Update package.json to include build script
+          if ! grep -q "\"build\":" package.json; then
+            jq '.scripts.build = "vite build"' package.json > package.json.tmp
+            mv package.json.tmp package.json
+          fi
+          
+      - name: Build
+        run: cd app && npm run build
+        
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
