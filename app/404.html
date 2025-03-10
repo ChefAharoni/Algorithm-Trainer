@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Algorithm Trainer</title>
+  <script>
+    // Redirect all 404 to the index.html with the requested path
+    const segment = location.pathname.substring(1).split('/')[0];
+    const baseHref = window.location.origin + '/Algorithm-Trainer/';
+    window.location.href = baseHref + '#' + location.pathname.substring(baseHref.length - window.location.origin.length - 1);
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>
