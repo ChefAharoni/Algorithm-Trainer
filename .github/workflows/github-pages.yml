@@ -25,24 +25,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-          cache-dependency-path: './app/package-lock.json'
-          
+          cache: "npm"
+          cache-dependency-path: "./app/package-lock.json"
+
       - name: Install Dependencies
         run: cd app && npm ci
-        
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Prepare App for GitHub Pages
         run: |
           cd app
-          
+
           # Create App.tsx for GitHub Pages with HashRouter
           cat > client/src/App.tsx << 'EOL'
           import { useState, useEffect } from 'react';
@@ -50,140 +50,317 @@ jobs:
           import { Toaster } from '@/components/ui/toaster';
           import { queryClient } from "@/lib/queryClient";
           import { QueryClientProvider } from "@tanstack/react-query";
-          
+
           // Pages
           import Home from '@/pages/Home';
           import RPNPage from '@/pages/RPNPage';
           import TreePage from '@/pages/TreePage';
           import NotFound from '@/pages/not-found';
-          
+
           // HashRouter wrapper for GitHub Pages
           function useHashLocation() {
             const [location, setLocation] = useState(
-              window.location.hash ? window.location.hash.replace("#", "") : "/"
+              window.location.hash ? window.location.hash.substring(1) : "/"
             );
-          
+
             useEffect(() => {
-              // Handle hash change and remove the # from the location
+              // Handle hash change
               const handleHashChange = () => {
                 const hash = window.location.hash || "#/";
-                setLocation(hash.replace("#", ""));
+                setLocation(hash.substring(1));
               };
-          
+
               window.addEventListener("hashchange", handleHashChange);
               handleHashChange(); // Handle initial hash
               return () => window.removeEventListener("hashchange", handleHashChange);
             }, []);
-          
+
             // Replace history functions to work with hash
             const navigate = (to) => {
               window.location.hash = to;
             };
-          
+
             return [location, navigate];
           }
-          
-          function Router() {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+          function App() {
             const [location, navigate] = useHashLocation();
             
             return (
-              <Switch location={location}>
-                <Route path="/" component={Home} />
-                <Route path="/rpn" component={RPNPage} />
-                <Route path="/tree" component={TreePage} />
-                <Route component={NotFound} />
-              </Switch>
-            );
-          }
-          
-          function App() {
-            return (
               <QueryClientProvider client={queryClient}>
                 <div className="min-h-screen bg-background">
-                  <Router />
+                  <Switch location={location}>
+                    <Route path="/" component={Home} />
+                    <Route path="/rpn" component={RPNPage} />
+                    <Route path="/tree" component={TreePage} />
+                    <Route component={NotFound} />
+                  </Switch>
                   <Toaster />
                 </div>
               </QueryClientProvider>
             );
           }
-          
+
           export default App;
           EOL
-          
-          # Create vite.config.ts for GitHub Pages
-          cat > vite.config.ts << 'EOL'
-          import { defineConfig } from 'vite';
-          import react from '@vitejs/plugin-react';
-          import path from 'path';
 
-          // https://vitejs.dev/config/
-          export default defineConfig({
-            base: '/Algorithm-Trainer/',
-            plugins: [react()],
-            resolve: {
-              alias: {
-                '@': path.resolve(__dirname, './client/src'),
-                '@shared': path.resolve(__dirname, './shared'),
-                '@server': path.resolve(__dirname, './server'),
+          # Create HashLink component for GitHub Pages
+          mkdir -p client/src/components
+          cat > client/src/components/HashLink.tsx << 'EOL'
+          import React from 'react';
+          import { Link } from 'wouter';
+
+          // Helper component to ensure links work with hash routing on GitHub Pages
+          const HashLink = ({ href, ...props }) => {
+            const handleClick = (e) => {
+              e.preventDefault();
+              window.location.hash = href;
+            };
+
+            return <Link href={href} {...props} onClick={handleClick} />;
+          };
+
+          export default HashLink;
+          EOL
+
+          # Update Home page with explicit colors
+          cat > client/src/pages/Home.tsx << 'EOL'
+          import HashLink from '@/components/HashLink';
+          import { Card, CardContent } from "@/components/ui/card";
+          import { Calculator, GitBranchPlus } from "lucide-react";
+
+          export default function Home() {
+            return (
+              <div className="bg-gray-100 min-h-screen">
+                <div className="container mx-auto px-4 py-8 max-w-3xl">
+                  <header className="mb-12 text-center">
+                    <h1 
+                      className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600"
+                      style={{
+                        // Fallback styles in case Tailwind classes don't apply
+                        backgroundImage: 'linear-gradient(to right, hsl(222.2, 47.4%, 11.2%), rgb(37, 99, 235))',
+                        WebkitBackgroundClip: 'text',
+                        backgroundClip: 'text',
+                        color: 'transparent'
+                      }}
+                    >
+                      Algorithm Trainer
+                    </h1>
+                    <p className="text-gray-600 text-lg">
+                      Interactive exercises to help you master essential algorithms and data structures
+                    </p>
+                  </header>
+
+                  <div className="grid md:grid-cols-2 gap-6 mb-12">
+                    {/* RPN Calculator Exercise */}
+                    <HashLink href="/rpn">
+                      <Card className="overflow-hidden transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
+                        <div 
+                          className="bg-primary/10 p-4 flex justify-center items-center"
+                          style={{
+                            // Fallback background color
+                            backgroundColor: 'hsla(222.2, 47.4%, 11.2%, 0.1)'
+                          }}
+                        >
+                          <Calculator 
+                            className="h-16 w-16 text-primary"
+                            style={{ 
+                              // Fallback color
+                              color: 'hsl(222.2, 47.4%, 11.2%)' 
+                            }}
+                          />
+                        </div>
+                        <CardContent className="p-6">
+                          <h2 
+                            className="text-xl font-bold mb-2 text-primary"
+                            style={{ 
+                              // Fallback color
+                              color: 'hsl(222.2, 47.4%, 11.2%)' 
+                            }}
+                          >
+                            RPN Calculator
+                          </h2>
+                          <p className="text-gray-600">
+                            Learn and practice stack-based Reverse Polish Notation calculations
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </HashLink>
+
+                    {/* Tree Traversal Exercise */}
+                    <HashLink href="/tree">
+                      <Card className="overflow-hidden transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
+                        <div 
+                          className="bg-blue-600/10 p-4 flex justify-center items-center"
+                          style={{
+                            // Fallback background color
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)'
+                          }}
+                        >
+                          <GitBranchPlus 
+                            className="h-16 w-16 text-blue-600"
+                            style={{ 
+                              // Fallback color
+                              color: 'rgb(37, 99, 235)' 
+                            }}
+                          />
+                        </div>
+                        <CardContent className="p-6">
+                          <h2 
+                            className="text-xl font-bold mb-2 text-blue-600"
+                            style={{ 
+                              // Fallback color
+                              color: 'rgb(37, 99, 235)' 
+                            }}
+                          >
+                            Binary Tree Traversal
+                          </h2>
+                          <p className="text-gray-600">
+                            Practice pre-order, in-order, and post-order tree traversal algorithms
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </HashLink>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">About Algorithm Trainer</h2>
+                    <p className="text-gray-700 mb-4">
+                      This interactive learning platform is designed to help you understand and practice
+                      essential algorithms and data structures through hands-on exercises. Select one of
+                      the exercises above to get started!
+                    </p>
+                    <p className="text-gray-700">
+                      Each exercise provides immediate feedback and visual representations to reinforce
+                      your understanding of key computer science concepts.
+                    </p>
+                  </div>
+
+                  <footer className="text-center text-gray-500 text-sm mt-12">
+                    <p>
+                      Algorithm Trainer | Building a stronger foundation in computer science
+                    </p>
+                  </footer>
+                </div>
+              </div>
+            );
+          }
+          EOL
+
+          # Update tailwind.config.js with specific color settings
+          cat > tailwind.config.js << 'EOL'
+          /** @type {import('tailwindcss').Config} */
+          export default {
+            darkMode: ["class"],
+            content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+            theme: {
+              extend: {
+                borderRadius: {
+                  lg: "var(--radius)",
+                  md: "calc(var(--radius) - 2px)",
+                  sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                  background: "hsl(var(--background))",
+                  foreground: "hsl(var(--foreground))",
+                  primary: {
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
+                    // Add specific color fallbacks
+                    "50": "#f0f9ff",
+                    "100": "#e0f2fe",
+                    "200": "#bae6fd",
+                    "300": "#7dd3fc",
+                    "400": "#38bdf8",
+                    "500": "#0ea5e9",
+                    "600": "#0284c7",
+                    "700": "#0369a1",
+                    "800": "#075985",
+                    "900": "#0c4a6e",
+                    "950": "#082f49",
+                  },
+                  secondary: {
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
+                  },
+                  muted: {
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
+                  },
+                  accent: {
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
+                  },
+                  destructive: {
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
+                  },
+                  border: "hsl(var(--border))",
+                  input: "hsl(var(--input))",
+                  ring: "hsl(var(--ring))",
+                  // Add explicit blue and green colors
+                  blue: {
+                    "50": "#eff6ff",
+                    "100": "#dbeafe",
+                    "200": "#bfdbfe",
+                    "300": "#93c5fd",
+                    "400": "#60a5fa",
+                    "500": "#3b82f6",
+                    "600": "#2563eb",
+                    "700": "#1d4ed8",
+                    "800": "#1e40af",
+                    "900": "#1e3a8a",
+                    "950": "#172554",
+                  },
+                  green: {
+                    "50": "#f0fdf4",
+                    "100": "#dcfce7",
+                    "200": "#bbf7d0",
+                    "300": "#86efac",
+                    "400": "#4ade80",
+                    "500": "#22c55e",
+                    "600": "#16a34a",
+                    "700": "#15803d",
+                    "800": "#166534",
+                    "900": "#14532d",
+                    "950": "#052e16",
+                  },
+                },
+                keyframes: {
+                  "accordion-down": {
+                    from: {
+                      height: "0",
+                    },
+                    to: {
+                      height: "var(--radix-accordion-content-height)",
+                    },
+                  },
+                  "accordion-up": {
+                    from: {
+                      height: "var(--radix-accordion-content-height)",
+                    },
+                    to: {
+                      height: "0",
+                    },
+                  },
+                },
+                animation: {
+                  "accordion-down": "accordion-down 0.2s ease-out",
+                  "accordion-up": "accordion-up 0.2s ease-out",
+                },
               },
             },
-            root: './client',
-            build: {
-              outDir: '../dist',
-              emptyOutDir: true,
-            },
-          });
-          EOL
-          
-          # Create main.tsx for GitHub Pages build
-          cat > client/src/main.tsx << 'EOL'
-          import React from 'react'
-          import ReactDOM from 'react-dom/client'
-          import App from './App.tsx'
-          import './index.css'
-
-          ReactDOM.createRoot(document.getElementById('root')!).render(
-            <React.StrictMode>
-              <App />
-            </React.StrictMode>
-          )
-          EOL
-          
-          # Create 404.html file for GitHub Pages
-          cat > 404.html << 'EOL'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Algorithm Trainer</title>
-            <script>
-              // Redirect all 404 to the index.html with the requested path
-              const segment = location.pathname.substring(1).split('/')[0];
-              const baseHref = '/Algorithm-Trainer/';
-              window.location.href = baseHref + '#' + location.pathname.substring(baseHref.length);
-            </script>
-          </head>
-          <body>
-            <p>Redirecting...</p>
-          </body>
-          </html>
-          EOL
-          
-      - name: Build
-        run: |
-          cd app
-          # Override the build command to use vite directly
-          npx vite build --config vite.config.ts
-        
-      - name: Copy 404.html to dist
-        run: cp app/404.html app/dist/
-        
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "./app/dist"
-          
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+            safelist: [
+              // Add classes that might be dynamically generated
+              'bg-gradient-to-r',
+              'from-primary',
+              'to-blue-600',
+              'text-primary',
+              'bg-primary',
+              'text-blue-600',
+              'bg-blue-600/10',
+              'bg-primary/10',
+              'text-transparent',
+              'bg-clip-text',
+            ],
+            plugins: [require("tailwindcss-animate"), require("@tailwindcss

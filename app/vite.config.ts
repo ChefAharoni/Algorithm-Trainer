@@ -1,36 +1,31 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
-import path, { dirname } from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { fileURLToPath } from "url";
+import path from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    runtimeErrorOverlay(),
-    themePlugin(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
-      : []),
-  ],
+  base: "/Algorithm-Trainer/",
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "client", "src"),
-      "@shared": path.resolve(__dirname, "shared"),
+      "@": path.resolve(__dirname, "./client/src"),
+      "@shared": path.resolve(__dirname, "./shared"),
+      "@server": path.resolve(__dirname, "./server"),
     },
   },
-  root: path.resolve(__dirname, "client"),
+  root: "./client",
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: "../dist",
     emptyOutDir: true,
+    // Ensure CSS is properly processed
+    cssCodeSplit: false, // Keep all CSS in one file
+    minify: true,
+    sourcemap: true,
+  },
+  css: {
+    // Ensure PostCSS processes all CSS
+    postcss: {
+      plugins: [require("tailwindcss"), require("autoprefixer")],
+    },
   },
 });

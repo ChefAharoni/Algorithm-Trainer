@@ -1,6 +1,4 @@
-// import { Link } from "wouter";
-import Link from "@/components/HashLink";
-
+import HashLink from "@/components/HashLink";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calculator, GitBranchPlus } from "lucide-react";
 
@@ -9,7 +7,17 @@ export default function Home() {
     <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <header className="mb-12 text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-4">
+          <h1
+            className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600"
+            style={{
+              // Fallback styles in case Tailwind classes don't apply
+              backgroundImage:
+                "linear-gradient(to right, hsl(222.2, 47.4%, 11.2%), rgb(37, 99, 235))",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
+          >
             Algorithm Trainer
           </h1>
           <p className="text-gray-600 text-lg">
@@ -20,13 +28,31 @@ export default function Home() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           {/* RPN Calculator Exercise */}
-          <Link href="/rpn">
+          <HashLink href="/rpn">
             <Card className="overflow-hidden transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
-              <div className="bg-primary/10 p-4 flex justify-center items-center">
-                <Calculator className="h-16 w-16 text-primary" />
+              <div
+                className="bg-primary/10 p-4 flex justify-center items-center"
+                style={{
+                  // Fallback background color
+                  backgroundColor: "hsla(222.2, 47.4%, 11.2%, 0.1)",
+                }}
+              >
+                <Calculator
+                  className="h-16 w-16 text-primary"
+                  style={{
+                    // Fallback color
+                    color: "hsl(222.2, 47.4%, 11.2%)",
+                  }}
+                />
               </div>
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold text-primary mb-2">
+                <h2
+                  className="text-xl font-bold mb-2 text-primary"
+                  style={{
+                    // Fallback color
+                    color: "hsl(222.2, 47.4%, 11.2%)",
+                  }}
+                >
                   RPN Calculator
                 </h2>
                 <p className="text-gray-600">
@@ -35,16 +61,34 @@ export default function Home() {
                 </p>
               </CardContent>
             </Card>
-          </Link>
+          </HashLink>
 
           {/* Tree Traversal Exercise */}
-          <Link href="/tree">
+          <HashLink href="/tree">
             <Card className="overflow-hidden transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
-              <div className="bg-blue-600/10 p-4 flex justify-center items-center">
-                <GitBranchPlus className="h-16 w-16 text-blue-600" />
+              <div
+                className="bg-blue-600/10 p-4 flex justify-center items-center"
+                style={{
+                  // Fallback background color
+                  backgroundColor: "rgba(37, 99, 235, 0.1)",
+                }}
+              >
+                <GitBranchPlus
+                  className="h-16 w-16 text-blue-600"
+                  style={{
+                    // Fallback color
+                    color: "rgb(37, 99, 235)",
+                  }}
+                />
               </div>
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold text-blue-600 mb-2">
+                <h2
+                  className="text-xl font-bold mb-2 text-blue-600"
+                  style={{
+                    // Fallback color
+                    color: "rgb(37, 99, 235)",
+                  }}
+                >
                   Binary Tree Traversal
                 </h2>
                 <p className="text-gray-600">
@@ -53,7 +97,7 @@ export default function Home() {
                 </p>
               </CardContent>
             </Card>
-          </Link>
+          </HashLink>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
