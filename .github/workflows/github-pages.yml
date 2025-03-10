@@ -42,6 +42,7 @@ jobs:
       - name: Prepare App for GitHub Pages
         run: |
           cd app
+          cp CNAME dist/
 
           # Create App.tsx for GitHub Pages with HashRouter
           cat > client/src/App.tsx << 'EOL'
