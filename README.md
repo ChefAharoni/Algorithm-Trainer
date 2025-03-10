@@ -56,4 +56,4 @@ The GitHub Actions workflow will:
 2. Install dependencies
 3. Configure the application for GitHub Pages (with HashRouter)
 4. Build the application
-5. Deploy to the `gh-pages` branch
+5. Deploy using the workflow
