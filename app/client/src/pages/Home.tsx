@@ -1,4 +1,6 @@
-import { Link } from "wouter";
+// import { Link } from "wouter";
+import Link from "@/components/HashLink";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Calculator, GitBranchPlus } from "lucide-react";
 
@@ -11,7 +13,8 @@ export default function Home() {
             Algorithm Trainer
           </h1>
           <p className="text-gray-600 text-lg">
-            Interactive exercises to help you master essential algorithms and data structures
+            Interactive exercises to help you master essential algorithms and
+            data structures
           </p>
         </header>
 
@@ -20,12 +23,15 @@ export default function Home() {
           <Link href="/rpn">
             <Card className="overflow-hidden transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
               <div className="bg-primary/10 p-4 flex justify-center items-center">
-                <Calculator className="h-16 w-16 text-primary"/>
+                <Calculator className="h-16 w-16 text-primary" />
               </div>
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold text-primary mb-2">RPN Calculator</h2>
+                <h2 className="text-xl font-bold text-primary mb-2">
+                  RPN Calculator
+                </h2>
                 <p className="text-gray-600">
-                  Learn and practice stack-based Reverse Polish Notation calculations
+                  Learn and practice stack-based Reverse Polish Notation
+                  calculations
                 </p>
               </CardContent>
             </Card>
@@ -35,12 +41,15 @@ export default function Home() {
           <Link href="/tree">
             <Card className="overflow-hidden transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
               <div className="bg-blue-600/10 p-4 flex justify-center items-center">
-                <GitBranchPlus className="h-16 w-16 text-blue-600"/>
+                <GitBranchPlus className="h-16 w-16 text-blue-600" />
               </div>
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold text-blue-600 mb-2">Binary Tree Traversal</h2>
+                <h2 className="text-xl font-bold text-blue-600 mb-2">
+                  Binary Tree Traversal
+                </h2>
                 <p className="text-gray-600">
-                  Practice pre-order, in-order, and post-order tree traversal algorithms
+                  Practice pre-order, in-order, and post-order tree traversal
+                  algorithms
                 </p>
               </CardContent>
             </Card>
@@ -48,21 +57,25 @@ export default function Home() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">About Algorithm Trainer</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            About Algorithm Trainer
+          </h2>
           <p className="text-gray-700 mb-4">
-            This interactive learning platform is designed to help you understand and practice
-            essential algorithms and data structures through hands-on exercises. Select one of
-            the exercises above to get started!
+            This interactive learning platform is designed to help you
+            understand and practice essential algorithms and data structures
+            through hands-on exercises. Select one of the exercises above to get
+            started!
           </p>
           <p className="text-gray-700">
-            Each exercise provides immediate feedback and visual representations to reinforce
-            your understanding of key computer science concepts.
+            Each exercise provides immediate feedback and visual representations
+            to reinforce your understanding of key computer science concepts.
           </p>
         </div>
 
         <footer className="text-center text-gray-500 text-sm mt-12">
           <p>
-            Algorithm Trainer | Building a stronger foundation in computer science
+            Algorithm Trainer | Building a stronger foundation in computer
+            science
           </p>
         </footer>
       </div>

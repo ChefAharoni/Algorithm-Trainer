@@ -1,6 +1,8 @@
 import { InstructionsPanel } from "@/components/InstructionsPanel";
 import { RPNCalculator } from "@/components/RPNCalculator";
-import { Link } from "wouter";
+// import { Link } from "wouter";
+import Link from "@/components/HashLink";
+
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -14,10 +16,14 @@ export default function RPNPage() {
             Back to Home
           </Button>
         </Link>
-        
+
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-primary mb-2">RPN Calculator</h1>
-          <p className="text-gray-600">Learn and practice Reverse Polish Notation calculations</p>
+          <h1 className="text-3xl font-bold text-primary mb-2">
+            RPN Calculator
+          </h1>
+          <p className="text-gray-600">
+            Learn and practice Reverse Polish Notation calculations
+          </p>
         </header>
 
         <RPNCalculator />
@@ -26,9 +32,9 @@ export default function RPNPage() {
         <footer className="text-center text-gray-500 text-sm mt-8">
           <p>
             Algorithm Trainer | Learn more about{" "}
-            <a 
-              href="https://en.wikipedia.org/wiki/Reverse_Polish_notation" 
-              target="_blank" 
+            <a
+              href="https://en.wikipedia.org/wiki/Reverse_Polish_notation"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
