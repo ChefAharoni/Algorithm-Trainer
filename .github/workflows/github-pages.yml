@@ -247,6 +247,126 @@ jobs:
           }
           EOL
 
+          # Update RPNPage.tsx with HashLink
+          cat > client/src/pages/RPNPage.tsx << 'EOL'
+          import { InstructionsPanel } from "@/components/InstructionsPanel";
+          import { RPNCalculator } from "@/components/RPNCalculator";
+          import HashLink from "@/components/HashLink";
+          import { Button } from "@/components/ui/button";
+          import { ArrowLeft } from "lucide-react";
+
+          export default function RPNPage() {
+            return (
+              <div className="bg-gray-100 min-h-screen">
+                <div className="container mx-auto px-4 py-8 max-w-3xl">
+                  <HashLink href="/">
+                    <Button variant="outline" className="mb-4 flex items-center gap-2">
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to Home
+                    </Button>
+                  </HashLink>
+                  
+                  <header className="mb-8 text-center">
+                    <h1 
+                      className="text-3xl font-bold mb-2 text-primary"
+                      style={{ color: 'hsl(222.2, 47.4%, 11.2%)' }}
+                    >
+                      RPN Calculator
+                    </h1>
+                    <p className="text-gray-600">Learn and practice Reverse Polish Notation calculations</p>
+                  </header>
+
+                  <RPNCalculator />
+                  <InstructionsPanel />
+
+                  <footer className="text-center text-gray-500 text-sm mt-8">
+                    <p>
+                      Algorithm Trainer | Learn more about{" "}
+                      <a 
+                        href="https://en.wikipedia.org/wiki/Reverse_Polish_notation" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                        style={{ color: 'hsl(222.2, 47.4%, 11.2%)' }}
+                      >
+                        Reverse Polish Notation
+                      </a>
+                    </p>
+                  </footer>
+                </div>
+              </div>
+            );
+          }
+          EOL
+
+          # Update TreePage.tsx with HashLink
+          cat > client/src/pages/TreePage.tsx << 'EOL'
+          import { TreeTraversal } from "@/components/TreeTraversal";
+          import HashLink from "@/components/HashLink";
+          import { Button } from "@/components/ui/button";
+          import { ArrowLeft } from "lucide-react";
+
+          export default function TreePage() {
+            return (
+              <div className="bg-gray-100 min-h-screen">
+                <div className="container mx-auto px-4 py-8 max-w-3xl">
+                  <HashLink href="/">
+                    <Button 
+                      variant="outline" 
+                      className="mb-4 flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to Home
+                    </Button>
+                  </HashLink>
+                  
+                  <header className="mb-8 text-center">
+                    <h1 
+                      className="text-3xl font-bold mb-2 text-primary"
+                      style={{ color: 'hsl(222.2, 47.4%, 11.2%)' }}
+                    >
+                      Binary Tree Traversal
+                    </h1>
+                    <p className="text-gray-600">Learn and practice different methods of tree traversal</p>
+                  </header>
+
+                  <TreeTraversal />
+                  
+                  <div className="mt-8 bg-blue-50 rounded-md p-5 border border-blue-200">
+                    <h2 className="text-xl font-semibold text-blue-800 mb-3">About Tree Traversals</h2>
+                    <div className="space-y-3">
+                      <p className="text-blue-700">
+                        <strong>Pre-order Traversal:</strong> Visit the root node first, then traverse the left subtree, and finally traverse the right subtree (Root, Left, Right).
+                      </p>
+                      <p className="text-blue-700">
+                        <strong>In-order Traversal:</strong> Traverse the left subtree first, then visit the root node, and finally traverse the right subtree (Left, Root, Right).
+                      </p>
+                      <p className="text-blue-700">
+                        <strong>Post-order Traversal:</strong> Traverse the left subtree first, then traverse the right subtree, and finally visit the root node (Left, Right, Root).
+                      </p>
+                    </div>
+                  </div>
+
+                  <footer className="text-center text-gray-500 text-sm mt-8">
+                    <p>
+                      Algorithm Trainer | Learn more about{" "}
+                      <a 
+                        href="https://en.wikipedia.org/wiki/Tree_traversal" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                        style={{ color: 'hsl(222.2, 47.4%, 11.2%)' }}
+                      >
+                        Tree Traversal
+                      </a>
+                    </p>
+                  </footer>
+                </div>
+              </div>
+            );
+          }
+          EOL
+
           # Update tailwind.config.js with specific color settings
           cat > tailwind.config.js << 'EOL'
           /** @type {import('tailwindcss').Config} */
@@ -363,4 +483,159 @@ jobs:
               'text-transparent',
               'bg-clip-text',
             ],
-            plugins: [require("tailwindcss-animate"), require("@tailwindcss
+            plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+          };
+          EOL
+
+          # Update index.css with explicit CSS variables and fallbacks
+          cat > client/src/index.css << 'EOL'
+          @tailwind base;
+          @tailwind components;
+          @tailwind utilities;
+
+          @layer base {
+            * {
+              @apply border-border;
+            }
+
+            body {
+              @apply font-sans antialiased bg-background text-foreground;
+            }
+            
+            :root {
+              --background: 0 0% 100%;
+              --foreground: 222.2 84% 4.9%;
+              --card: 0 0% 100%;
+              --card-foreground: 222.2 84% 4.9%;
+              --popover: 0 0% 100%;
+              --popover-foreground: 222.2 84% 4.9%;
+              --primary: 222.2 47.4% 11.2%;
+              --primary-foreground: 210 40% 98%;
+              --secondary: 210 40% 96.1%;
+              --secondary-foreground: 222.2 47.4% 11.2%;
+              --muted: 210 40% 96.1%;
+              --muted-foreground: 215.4 16.3% 46.9%;
+              --accent: 210 40% 96.1%;
+              --accent-foreground: 222.2 47.4% 11.2%;
+              --destructive: 0 84.2% 60.2%;
+              --destructive-foreground: 210 40% 98%;
+              --border: 214.3 31.8% 91.4%;
+              --input: 214.3 31.8% 91.4%;
+              --ring: 222.2 84% 4.9%;
+              --radius: 0.5rem;
+            }
+          }
+
+          /* Explicit fallback styles for common classes */
+          .bg-primary {
+            background-color: hsl(222.2, 47.4%, 11.2%);
+          }
+
+          .text-primary {
+            color: hsl(222.2, 47.4%, 11.2%);
+          }
+
+          .border-primary {
+            border-color: hsl(222.2, 47.4%, 11.2%);
+          }
+
+          .bg-primary\/10 {
+            background-color: hsla(222.2, 47.4%, 11.2%, 0.1);
+          }
+
+          .bg-blue-600\/10 {
+            background-color: rgba(37, 99, 235, 0.1);
+          }
+
+          .text-blue-600 {
+            color: rgb(37, 99, 235);
+          }
+
+          .to-blue-600 {
+            --tw-gradient-to: rgb(37, 99, 235);
+          }
+
+          .from-primary {
+            --tw-gradient-from: hsl(222.2, 47.4%, 11.2%);
+            --tw-gradient-to: hsla(222.2, 47.4%, 11.2%, 0);
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+          }
+
+          .bg-gradient-to-r {
+            background-image: linear-gradient(to right, var(--tw-gradient-stops));
+          }
+
+          .bg-clip-text {
+            -webkit-background-clip: text;
+            background-clip: text;
+          }
+
+          .text-transparent {
+            color: transparent;
+          }
+          EOL
+
+          # Create vite.config.ts for GitHub Pages
+          cat > vite.config.ts << 'EOL'
+          import { defineConfig } from 'vite';
+          import react from '@vitejs/plugin-react';
+          import path from 'path';
+
+          // https://vitejs.dev/config/
+          export default defineConfig({
+            base: '/Algorithm-Trainer/',
+            plugins: [react()],
+            resolve: {
+              alias: {
+                '@': path.resolve(__dirname, './client/src'),
+                '@shared': path.resolve(__dirname, './shared'),
+                '@server': path.resolve(__dirname, './server'),
+              },
+            },
+            root: './client',
+            build: {
+              outDir: '../dist',
+              emptyOutDir: true,
+              minify: true,
+              sourcemap: true,
+            },
+          });
+          EOL
+
+          # Create 404.html file for GitHub Pages
+          cat > 404.html << 'EOL'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Algorithm Trainer</title>
+            <script>
+              // Redirect all 404 to the index.html with the requested path
+              const segment = location.pathname.substring(1).split('/')[0];
+              const baseHref = '/Algorithm-Trainer/';
+              window.location.href = baseHref + '#' + location.pathname.substring(baseHref.length);
+            </script>
+          </head>
+          <body>
+            <p>Redirecting...</p>
+          </body>
+          </html>
+          EOL
+
+      - name: Build
+        run: |
+          cd app
+          # Override the build command to use vite directly with explicit options
+          npx vite build --config vite.config.ts
+
+      - name: Copy 404.html to dist
+        run: cp app/404.html app/dist/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./app/dist"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
