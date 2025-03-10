@@ -30,11 +30,6 @@ jobs:
       - name: Install Dependencies
         run: cd app && npm ci
         
-      - name: Copy Build Files
-        run: |
-          # Copy our build script and 404.html file to app directory
-          cp build-static.js app/
-          cp 404.html app/
           
       - name: Prepare App for GitHub Pages
         run: |
