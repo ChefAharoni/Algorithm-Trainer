@@ -128,11 +128,26 @@ jobs:
                 '@server': path.resolve(__dirname, './server'),
               },
             },
+            root: './client',
             build: {
               outDir: '../dist',
               emptyOutDir: true,
             },
           });
+          EOL
+          
+          # Create main.tsx for GitHub Pages build
+          cat > client/src/main.tsx << 'EOL'
+          import React from 'react'
+          import ReactDOM from 'react-dom/client'
+          import App from './App.tsx'
+          import './index.css'
+
+          ReactDOM.createRoot(document.getElementById('root')!).render(
+            <React.StrictMode>
+              <App />
+            </React.StrictMode>
+          )
           EOL
           
           # Create 404.html file for GitHub Pages
@@ -156,7 +171,10 @@ jobs:
           EOL
           
       - name: Build
-        run: cd app && npm run build
+        run: |
+          cd app
+          # Override the build command to use vite directly
+          npx vite build --config vite.config.ts
         
       - name: Copy 404.html to dist
         run: cp app/404.html dist/
