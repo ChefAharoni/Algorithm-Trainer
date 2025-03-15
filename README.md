@@ -19,6 +19,10 @@ This project is configured to automatically deploy to GitHub Pages when changes 
 
 **Live Demo:** [https://chefaharoni.github.io/Algorithm-Trainer/](https://chefaharoni.github.io/Algorithm-Trainer/)
 
+### Premium Version Beta is Live!
+
+**Try the premium version here**: [algorithm-trainer.com](https://algorithm-trainer.com)
+
 ## Development Setup
 
 1. Clone the repository
